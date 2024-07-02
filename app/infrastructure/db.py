@@ -3,7 +3,7 @@ import os
 from sqlmodel import create_engine, SQLModel, Session
 from app.domain import models
 
-DATABASE_URL = "sqlite:///./database.db" # os.environ.get("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL, echo=True)
 
