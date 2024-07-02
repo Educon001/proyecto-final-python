@@ -2,18 +2,18 @@ from enum import Enum
 
 
 class StorageType(Enum):
-    REFRIGERADOS = 'Refrigerados'
-    CONGELADOS = 'Congelados'
-    GENERAL = 'General'
+    Refrigerados = 'Refrigerados'
+    Congelados = 'Congelados'
+    General = 'General'
 
 
 class OrderStatus(Enum):
-    EN_PROCESO = 'En proceso'
-    FINALIZADO = 'Finalizado'
+    En_proceso = 'En_proceso'
+    Finalizado = 'Finalizado'
 
 
 class UserRole(Enum):
-    ADMIN = 'Admin'
-    CHEF = 'Chef'
-    WAITER = 'Waiter'
-    CUSTOMER = 'Customer'
+    Admin = 'Admin'
+    Chef = 'Chef'
+    Waiter = 'Waiter'
+    Customer = 'Customer'
