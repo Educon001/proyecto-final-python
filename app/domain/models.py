@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import List, Optional
 from uuid import UUID, uuid4
 from app.domain.enums import OrderStatus, UserRole, StorageType
+from pydantic import BaseModel
 
 
 class IngredientBase(SQLModel):
@@ -14,10 +15,12 @@ class IngredientBase(SQLModel):
 class Ingredient(IngredientBase, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
 
-
 class IngredientCreate(IngredientBase):
     pass
 
+class IngredientUpdate(BaseModel):
+    add: int
+    take: int
 
 class IngredientPublic(IngredientBase):
     id: UUID
