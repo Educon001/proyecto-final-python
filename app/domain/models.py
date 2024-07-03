@@ -4,31 +4,66 @@ from uuid import UUID, uuid4
 from app.domain.enums import OrderStatus, UserRole, StorageType
 
 
-# Entity
-class Ingredient(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+class IngredientBase(SQLModel):
     name: str
     quantity: float
     storage: StorageType
 
 
 # Entity
-class DishItem(SQLModel, table=True):
+class Ingredient(IngredientBase, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+
+
+class IngredientCreate(IngredientBase):
+    pass
+
+
+class IngredientPublic(IngredientBase):
+    id: UUID
+
+
+class DishItemBase(SQLModel):
     ingredient_id: UUID = Field(foreign_key="ingredient.id")
-    ingredient: Ingredient = Relationship()
     quantity: float
-    dish_id: UUID = Field(foreign_key="dish.id")
+
+
+# Entity
+class DishItem(DishItemBase, table=True):
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    dish_id: Optional[UUID] = Field(foreign_key="dish.id")
+    ingredient: Ingredient = Relationship()
+
+
+class DishItemCreate(DishItemBase):
+    pass
+
+
+class DishItemPublic(DishItemBase):
+    id: UUID
+    ingredient: IngredientPublic = None
+
+
+class DishBase(SQLModel):
+    name: str
+    recipe: str
+    price: float
 
 
 # Aggregate
-class Dish(SQLModel, table=True):
+class Dish(DishBase, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
-    name: str
     ingredients: List[DishItem] = Relationship()
-    recipe: str
-    price: float
-    menu_id: UUID = Field(foreign_key="menu.id")
+    menu_id: Optional[UUID] = Field(foreign_key="menu.id")
+
+
+class DishCreate(DishBase):
+    ingredients: List[DishItemCreate]
+
+
+class DishPublic(DishBase):
+    id: UUID
+    ingredients: List[DishItemPublic] = None
 
 
 # Aggregate
@@ -37,34 +72,78 @@ class Menu(SQLModel, table=True):
     dishes: List[Dish] = Relationship()
 
 
-# Entity
-class OrderItem(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+class MenuCreate(SQLModel):
+    dishes: List[UUID]
+
+
+class MenuPublic(SQLModel):
+    id: UUID
+    dishes: List[DishPublic] = None
+
+
+class OrderItemBase(SQLModel):
     dish_id: UUID = Field(foreign_key="dish.id")
-    dish: Dish = Relationship()
     quantity: int
-    order_id: UUID = Field(foreign_key="order.id")
 
 
 # Entity
-class User(SQLModel, table=True):
+class OrderItem(OrderItemBase, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    dish: Dish = Relationship()
+    order_id: Optional[UUID] = Field(foreign_key="order.id")
+
+
+class OrderItemCreate(OrderItemBase):
+    pass
+
+
+class OrderItemPublic(OrderItemBase):
+    id: UUID
+    dish: DishPublic = None
+
+
+class UserBase(SQLModel):
     username: str
-    password: str
     role: UserRole
+    is_active: bool
 
 
 # Entity
-class Customer(User):
+class User(UserBase, table=True):
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    hashed_password: str
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class UserPublic(UserBase):
+    id: UUID
+
+
+class CustomerCreate(UserCreate):
     role: UserRole = UserRole.Customer
 
 
-# Aggregate
-class Order(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
-    items: List[OrderItem] = Relationship()
+class OrderBase(SQLModel):
     total: float
     status: OrderStatus
     customer_id: UUID = Field(foreign_key="user.id")
+
+
+# Aggregate
+class Order(OrderBase, table=True):
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    items: List[OrderItem] = Relationship()
     customer: User = Relationship()
 
+
+class OrderCreate(OrderBase):
+    items: List[OrderItemCreate]
+
+
+class OrderPublic(OrderBase):
+    id: UUID
+    items: List[OrderItemPublic] = None
+    customer: UserPublic = None

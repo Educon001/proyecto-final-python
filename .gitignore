@@ -116,9 +116,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# SQLAlchemy
-migrations/versions/*
-
 # FastAPI specific
 __pycache__/
 *.sqlite3
@@ -128,9 +125,6 @@ tests/__pycache__/
 # PostgreSQL
 pg_data/
 postgres_data/
-
-# alembic
-alembic/versions/
 
 # Editor directories and files
 .vscode/
