@@ -135,3 +135,5 @@ postgres_data/
 # Misc
 *.swp
 *~
+
+database.db
