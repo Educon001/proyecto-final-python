@@ -1,10 +1,10 @@
-from typing import Optional, List
+from typing import Optional, List, Type
 from sqlmodel import Session, select
 from fastapi import Depends
 from app.infrastructure.db import get_session
 from app.domain.repositories import IRepository
 from uuid import UUID
-from app.domain.models import Dish
+from app.domain.models import Dish, DishUpdate
 
 
 class DishRepository(IRepository[Dish]):
@@ -32,4 +32,16 @@ class DishRepository(IRepository[Dish]):
             self.session.delete(result)
             self.session.commit()
             return dish_id
+        return None
+
+    def update(self, dish_id: UUID, dish: DishUpdate) -> Optional[Dish]:
+        result = self.session.get(Dish, dish_id)
+        if result:
+            dish_data = dish.model_dump()
+            for key, value in dish_data.items():
+                setattr(result, key, value)
+            self.session.add(result)
+            self.session.commit()
+            self.session.refresh(result)
+            return result
         return None

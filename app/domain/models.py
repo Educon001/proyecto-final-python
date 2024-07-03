@@ -39,9 +39,13 @@ class DishItemCreate(DishItemBase):
     pass
 
 
-class DishItemPublic(DishItemBase):
-    id: UUID
-    ingredient: IngredientPublic = None
+class DishItemIngredient(SQLModel):
+    name: str
+
+
+class DishItemPublic(SQLModel):
+    ingredient: DishItemIngredient
+    quantity: float
 
 
 class DishBase(SQLModel):
@@ -59,6 +63,10 @@ class Dish(DishBase, table=True):
 
 class DishCreate(DishBase):
     ingredients: List[DishItemCreate]
+
+
+class DishUpdate(DishBase):
+    pass
 
 
 class DishPublic(DishBase):
