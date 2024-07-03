@@ -105,9 +105,9 @@ class OrderItemCreate(OrderItemBase):
     pass
 
 
-class OrderItemPublic(OrderItemBase):
-    id: UUID
-    dish: DishPublic = None
+class OrderItemPublic(SQLModel):
+    dish: DishPublic
+    quantity: int
 
 
 class UserBase(SQLModel):
@@ -135,7 +135,6 @@ class CustomerCreate(UserCreate):
 
 
 class OrderBase(SQLModel):
-    total: float
     status: OrderStatus
     customer_id: UUID = Field(foreign_key="user.id")
 
@@ -145,6 +144,7 @@ class Order(OrderBase, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     items: List[OrderItem] = Relationship()
     customer: User = Relationship()
+    total: Optional[float] = Field(default=0.0)
 
 
 class OrderCreate(OrderBase):
@@ -155,3 +155,4 @@ class OrderPublic(OrderBase):
     id: UUID
     items: List[OrderItemPublic] = None
     customer: UserPublic = None
+    total: float

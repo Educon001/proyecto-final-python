@@ -1,4 +1,4 @@
-from typing import Optional, List, Type
+from typing import Optional, List
 from sqlmodel import Session, select
 from fastapi import Depends
 from app.infrastructure.db import get_session
