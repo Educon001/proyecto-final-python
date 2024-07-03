@@ -3,9 +3,10 @@ from sqlmodel import Session
 from uuid import UUID
 from typing import List
 
+from app.auth.dependencies import get_current_user
 from app.infrastructure.db import get_session
 from app.infrastructure.repositories.ingredient_repository import IngredientRepository
-from app.domain.models import Ingredient, IngredientCreate, IngredientPublic, IngredientUpdate
+from app.domain.models import Ingredient, IngredientCreate, IngredientPublic, IngredientUpdate, User
 
 router = APIRouter(prefix="/ingredients", tags=["ingredients"])
 
@@ -20,14 +21,17 @@ def get_ingredientes(ingredient_repository: IngredientRepository = Depends(get_i
 
 
 @router.post("/", response_model=IngredientPublic, status_code=status.HTTP_201_CREATED)
-def add_ingredient(ingredient: IngredientCreate, Ingredient_repository: IngredientRepository = Depends(get_ingredient_repository)):
+def add_ingredient(ingredient: IngredientCreate,
+                   Ingredient_repository: IngredientRepository = Depends(get_ingredient_repository),
+                   current_user: User = Depends(get_current_user)):
     new_ingredient = Ingredient(name=ingredient.name, quantity=ingredient.quantity, storage=ingredient.storage)
     return Ingredient_repository.add(new_ingredient)
 
 
 @router.get("/{ingredient_id}", response_model=IngredientPublic, status_code=status.HTTP_200_OK,
             responses={404: {"description": "Ingredient not found"}})
-def get_ingredient(ingredient_id: UUID, ingredient_repository: IngredientRepository = Depends(get_ingredient_repository)):
+def get_ingredient(ingredient_id: UUID,
+                   ingredient_repository: IngredientRepository = Depends(get_ingredient_repository)):
     ingredient = ingredient_repository.get_by_id(ingredient_id)
     if not ingredient:
         raise HTTPException(status_code=404, detail="Ingredient not found")
@@ -36,7 +40,9 @@ def get_ingredient(ingredient_id: UUID, ingredient_repository: IngredientReposit
 
 @router.delete("/{ingredient_id}", status_code=status.HTTP_204_NO_CONTENT,
                responses={404: {"description": "Ingredient not found"}})
-def delete_ingredient(ingredient_id: UUID, ingredient_repository: IngredientRepository = Depends(get_ingredient_repository)):
+def delete_ingredient(ingredient_id: UUID,
+                      ingredient_repository: IngredientRepository = Depends(get_ingredient_repository),
+                      current_user: User = Depends(get_current_user)):
     deleted = ingredient_repository.delete(ingredient_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Ingredient not found")
@@ -45,7 +51,9 @@ def delete_ingredient(ingredient_id: UUID, ingredient_repository: IngredientRepo
 
 @router.put("/{ingredient_id}", response_model=Ingredient, status_code=status.HTTP_200_OK,
             responses={404: {"description": "Ingredient not found"}})
-def update_ingredient(ingredient_id: UUID, ingredientUpdate: IngredientUpdate, ingredient_repository: IngredientRepository = Depends(get_ingredient_repository)):
+def update_ingredient(ingredient_id: UUID, ingredientUpdate: IngredientUpdate,
+                      ingredient_repository: IngredientRepository = Depends(get_ingredient_repository),
+                      current_user: User = Depends(get_current_user)):
     updated = ingredient_repository.update(ingredient_id, ingredientUpdate)
     if not updated:
         raise HTTPException(status_code=404, detail="Ingredient not found")
