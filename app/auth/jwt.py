@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from typing import Optional
 from app.config import settings
-from app.schemas import TokenData
+from app.domain.models import TokenData
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
