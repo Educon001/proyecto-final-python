@@ -4,7 +4,7 @@ from uuid import UUID
 from typing import List
 
 from app.infrastructure.db import get_session
-from app.infrastructure.repositories import DishRepository
+from app.infrastructure.repositories.dish_repository import DishRepository
 from app.domain.models import Dish, DishCreate, DishPublic, DishItem, DishUpdate
 
 router = APIRouter(prefix="/dishes", tags=["dishes"])
