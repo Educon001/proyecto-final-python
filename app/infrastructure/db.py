@@ -1,15 +1,12 @@
 import os
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
 from sqlmodel import create_engine, SQLModel, Session
 from app.domain import models
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:password@db:5432/fastapi_db"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+engine = create_engine(DATABASE_URL, echo=True)
+
 
 def init_db():
     SQLModel.metadata.create_all(engine)

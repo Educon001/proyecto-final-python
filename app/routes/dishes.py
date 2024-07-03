@@ -3,9 +3,10 @@ from sqlmodel import Session
 from uuid import UUID
 from typing import List
 
+from app.auth.dependencies import get_current_user
 from app.infrastructure.db import get_session
 from app.infrastructure.repositories.dish_repository import DishRepository
-from app.domain.models import Dish, DishCreate, DishPublic, DishItem, DishUpdate
+from app.domain.models import Dish, DishCreate, DishPublic, DishItem, DishUpdate, User
 
 router = APIRouter(prefix="/dishes", tags=["dishes"])
 
@@ -20,7 +21,8 @@ def get_dishes(dish_repository: DishRepository = Depends(get_dish_repository)):
 
 
 @router.post("/", response_model=DishPublic, status_code=status.HTTP_201_CREATED)
-def add_dish(dish: DishCreate, dish_repository: DishRepository = Depends(get_dish_repository)):
+def add_dish(dish: DishCreate, dish_repository: DishRepository = Depends(get_dish_repository),
+             current_user: User = Depends(get_current_user)):
     new_dish = Dish(name=dish.name, recipe=dish.recipe, price=dish.price,
                     ingredients=[
                         DishItem(ingredient_id=dish_item.ingredient_id, quantity=dish_item.quantity)
@@ -39,7 +41,8 @@ def get_dish(dish_id: UUID, dish_repository: DishRepository = Depends(get_dish_r
 
 @router.delete("/{dish_id}", status_code=status.HTTP_204_NO_CONTENT,
                responses={404: {"description": "Dish not found"}})
-def delete_dish(dish_id: UUID, dish_repository: DishRepository = Depends(get_dish_repository)):
+def delete_dish(dish_id: UUID, dish_repository: DishRepository = Depends(get_dish_repository),
+                current_user: User = Depends(get_current_user)):
     deleted = dish_repository.delete(dish_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Dish not found")
@@ -48,7 +51,8 @@ def delete_dish(dish_id: UUID, dish_repository: DishRepository = Depends(get_dis
 
 @router.put("/{dish_id}", response_model=DishPublic, status_code=status.HTTP_200_OK,
             responses={404: {"description": "Dish not found"}})
-def update_dish(dish_id: UUID, dish: DishUpdate, dish_repository: DishRepository = Depends(get_dish_repository)):
+def update_dish(dish_id: UUID, dish: DishUpdate, dish_repository: DishRepository = Depends(get_dish_repository),
+                current_user: User = Depends(get_current_user)):
     updated = dish_repository.update(dish_id, dish)
     if not updated:
         raise HTTPException(status_code=404, detail="Dish not found")

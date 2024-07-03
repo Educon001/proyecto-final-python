@@ -3,10 +3,10 @@ from sqlmodel import Session, select
 from uuid import UUID
 from typing import List
 
+from app.auth.dependencies import get_current_user
 from app.infrastructure.db import get_session
 from app.infrastructure.repositories.dish_repository import DishRepository
-from app.domain.models import Menu, MenuCreate, MenuPublic
-
+from app.domain.models import Menu, MenuCreate, MenuPublic, User
 
 router = APIRouter(prefix="/menus", tags=["menus"])
 
@@ -19,7 +19,7 @@ def get_menus(session: Session = Depends(get_session)):
 
 
 @router.post("/", response_model=MenuPublic, status_code=status.HTTP_201_CREATED)
-def add_menu(menu: MenuCreate, session: Session = Depends(get_session)):
+def add_menu(menu: MenuCreate, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     dish_repository = DishRepository(session)
     dishes = [dish_repository.get_by_id(dish_id) for dish_id in menu.dishes]
     new_menu = Menu(dishes=dishes)
@@ -39,8 +39,8 @@ def get_menu(menu_id: UUID, session: Session = Depends(get_session)):
 
 
 @router.delete("/{menu_id}", status_code=status.HTTP_204_NO_CONTENT,
-                responses={404: {"description": "Menu not found"}})
-def delete_menu(menu_id: UUID, session: Session = Depends(get_session)):
+               responses={404: {"description": "Menu not found"}})
+def delete_menu(menu_id: UUID, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     result = session.get(Menu, menu_id)
     if not result:
         raise HTTPException(status_code=404, detail="Menu not found")
@@ -51,7 +51,8 @@ def delete_menu(menu_id: UUID, session: Session = Depends(get_session)):
 
 @router.put("/{menu_id}/add_dishes", response_model=MenuPublic, status_code=status.HTTP_200_OK,
             responses={404: {"description": "Menu not found"}})
-def add_menu_dishes(menu_id: UUID, menu: MenuCreate, session: Session = Depends(get_session)):
+def add_menu_dishes(menu_id: UUID, menu: MenuCreate, session: Session = Depends(get_session),
+                    current_user: User = Depends(get_current_user)):
     result = session.get(Menu, menu_id)
     if not result:
         raise HTTPException(status_code=404, detail="Menu not found")
@@ -65,7 +66,8 @@ def add_menu_dishes(menu_id: UUID, menu: MenuCreate, session: Session = Depends(
 
 @router.put("/{menu_id}/remove_dishes", response_model=MenuPublic, status_code=status.HTTP_200_OK,
             responses={404: {"description": "Menu not found"}})
-def remove_menu_dishes(menu_id: UUID, menu: MenuCreate, session: Session = Depends(get_session)):
+def remove_menu_dishes(menu_id: UUID, menu: MenuCreate, session: Session = Depends(get_session),
+                       current_user: User = Depends(get_current_user)):
     result = session.get(Menu, menu_id)
     if not result:
         raise HTTPException(status_code=404, detail="Menu not found")
@@ -79,4 +81,3 @@ def remove_menu_dishes(menu_id: UUID, menu: MenuCreate, session: Session = Depen
     except Exception:
         raise HTTPException(status_code=404, detail="Dish not found")
     return result
-
